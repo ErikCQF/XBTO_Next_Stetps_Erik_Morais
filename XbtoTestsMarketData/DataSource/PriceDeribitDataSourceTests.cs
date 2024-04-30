@@ -3,7 +3,7 @@ using Moq;
 using XbtoMarketData.DataSource;
 using XbtoMarketData.DataSource.Price;
 
-namespace XbtoTestsMarketData.DataSource
+namespace DataSource.Price
 {
     public class PriceDeribitDataSourceTests
     {

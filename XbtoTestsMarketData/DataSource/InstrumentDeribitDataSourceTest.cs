@@ -3,7 +3,7 @@ using Moq;
 using XbtoMarketData.DataSource;
 using XbtoMarketData.DataSource.Instrument;
 
-namespace XbtoTestsMarketData.DataSource
+namespace DataSource.Instrument
 {
     public class InstrumentDeribitDataSourceTest
     {

@@ -7,7 +7,7 @@ using XbtoMarketData.DataSource.Price;
 using XbtoMarketData.Service;
 using XbtoMarketData.Utils;
 
-namespace XbtoTestsMarketData.Services
+namespace MarketPriceMonitor.UnitTests
 {
     public class PriceMonitorTest
     {
@@ -26,18 +26,19 @@ namespace XbtoTestsMarketData.Services
             }
 
             /// <summary>
-            /// Returm time waited in seconds
+            /// This Function Maximise the using of the rate Limite
+            /// it calculates the time it need to await so fix a max limite rate
             /// </summary>
-            /// <param name="rateLimit"></param>
-            /// <param name="runningTime"></param>
-            /// <param name="totalRequest"></param>
+            /// <param name="rateLimit"> Request per Second</param>
+            /// <param name="runningTime"> Total time running </param>
+            /// <param name="totalRequest">Total Request  </param>
             /// <returns></returns>
-            public async Task<double> RateLimitTest(int rateLimit, double runningTime, int totalRequest)
+            public async Task<double> RateLimitConstrainerTest(int rateLimit, double runningTime, int totalRequest)
             {
 
                 var startTime = DateTime.Now;
 
-                await RateLimit(rateLimit, runningTime, totalRequest);
+                await base.RateLimitConstrainer(rateLimit, runningTime, totalRequest);
 
                 var endTime = DateTime.Now;
 
@@ -50,7 +51,7 @@ namespace XbtoTestsMarketData.Services
         [InlineData(10, 10, 1000, 9)]
         [InlineData(10, 1, 100, 9)]
         [InlineData(11, 10, 10, 0)]
-        public async Task Test_Rate_Limite(int rateLimit, double runningTime, int totalRequest, int expectedWaitTimeMs)
+        public async Task Test_Rate_Limite_Constrainner(int rateLimit, double runningTime, int totalRequest, int expectedWaitTimeMs)
         {
             //Arrange
 
@@ -66,7 +67,7 @@ namespace XbtoTestsMarketData.Services
 
 
             //Act
-            var waitedTime = await priceMonitor.RateLimitTest(rateLimit, runningTime, totalRequest);
+            var waitedTime = await priceMonitor.RateLimitConstrainerTest(rateLimit, runningTime, totalRequest);
 
             //Assert
             Assert.True(waitedTime >= expectedWaitTimeMs);
@@ -128,8 +129,10 @@ namespace XbtoTestsMarketData.Services
 
             var running = priceMonitor.Start(1, 1000000, cancToken.Token);
 
-
+            
             await Task.Delay(3000);
+
+            cancToken.Cancel();
 
             //Assert
             Assert.True(eventRaised);

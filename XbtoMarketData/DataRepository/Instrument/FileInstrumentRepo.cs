@@ -87,14 +87,5 @@ namespace XbtoMarketData.DataRepository.Instrument
                 await JsonSerializer.SerializeAsync(fs, data);
             }
         }
-
-        private void EnsureFileExists()
-        {
-            // Create file if it doesn't exist
-            if (!File.Exists(_filePath))
-            {
-                File.Create(_filePath).Close();
-            }
-        }
     }
 }

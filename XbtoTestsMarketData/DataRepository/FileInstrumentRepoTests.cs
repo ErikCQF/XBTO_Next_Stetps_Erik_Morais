@@ -1,5 +1,6 @@
 ﻿using XbtoMarketData.DataRepository.Instrument;
 
+namespace DataRepository.Instrument;
 public class FileInstrumentRepoTests
 {
     [Fact]

@@ -128,7 +128,7 @@ namespace XbtoMarketData.Service
                     totalRequest++;
 
                     //Rate Limite. if has reach,it will wait til it can process agains
-                    await RateLimit(rateLimit, (_dateProvider.Now - timeStarted).TotalSeconds, totalRequest);
+                    await RateLimitConstrainer(rateLimit, (_dateProvider.Now - timeStarted).TotalSeconds, totalRequest);
 
                     if (price == null)
                     {
@@ -159,7 +159,9 @@ namespace XbtoMarketData.Service
                 if (runningTime < _fetchIntervalSeconds)
                 {
                     // Wait before fetching prices again    
-                    await Task.Delay(_fetchIntervalSeconds * 1000);
+                    //it just need to wait for the remaiing interval from the last pulse 
+                    var waitTimeForNextFecth = (int)Math.Ceiling(_fetchIntervalSeconds - runningTime);
+                    await Task.Delay(waitTimeForNextFecth * 1000);
                 }
 
             }
@@ -167,21 +169,21 @@ namespace XbtoMarketData.Service
 
         }
         /// <summary>
-        /// This Function Maximise the using of the rateL imite
+        /// This Function Maximise the using of the rate Limite
+        /// it calculates the time it need to await so fix a max limite rate
         /// </summary>
         /// <param name="rateLimit"> Request per Second</param>
         /// <param name="runningTime"> Total time running </param>
         /// <param name="totalRequest">Total Request  </param>
         /// <returns></returns>
-        protected virtual async Task RateLimit(int rateLimit, double runningTime, int totalRequest)
+        protected virtual async Task RateLimitConstrainer(int rateLimit, double runningTime, int totalRequest)
         {
             if (runningTime <= 0)
             {
                 return;
             }
             var usedRate = totalRequest / runningTime;
-
-
+            
             while (usedRate >= rateLimit)
             {
                 // it is running faster than the allowed rate, so we nneed to slow down

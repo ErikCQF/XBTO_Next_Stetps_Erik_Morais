@@ -9,7 +9,7 @@ using XbtoMarketData.DataSource.Price;
 using XbtoMarketData.Service;
 using XbtoMarketData.Utils;
 
-namespace XbtoTestsMarketData.Services
+namespace MarketPriceMonitor.Integrated
 {
     public class PriceMonitorIntegratedTest
     {

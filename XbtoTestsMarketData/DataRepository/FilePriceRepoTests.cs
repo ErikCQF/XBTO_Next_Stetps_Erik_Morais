@@ -2,7 +2,7 @@
 using XbtoMarketData.DataRepository.Price;
 
 
-namespace XbtoTestsMarketData.DataRepository;
+namespace DataRepository.Price;
 
 public class FilePriceRepoTests
 {
