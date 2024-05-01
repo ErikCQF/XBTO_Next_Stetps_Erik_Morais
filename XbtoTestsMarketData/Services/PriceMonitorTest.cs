@@ -38,7 +38,7 @@ namespace MarketPriceMonitor.UnitTests
 
                 var startTime = DateTime.Now;
 
-                await base.RateLimitConstrainer(rateLimit, runningTime, totalRequest);
+                await base.WaiterRateLimitConstraint(rateLimit, runningTime, totalRequest);
 
                 var endTime = DateTime.Now;
 

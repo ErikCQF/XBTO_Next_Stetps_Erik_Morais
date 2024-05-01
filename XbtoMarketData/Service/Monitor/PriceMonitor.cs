@@ -81,8 +81,9 @@ namespace XbtoMarketData.Service.Monitor
             _cancellationToken = new CancellationTokenSource();
             var toMonitorList = await _instrumentRepo.GetToMonitor();
 
-            //Loads all Saved Inttruments from DB to be Monitored
-            if (toMonitorList.Any())
+            // Loads all Saved Inttruments from DB to be Monitored
+            // Thread Safe
+            if (toMonitorList!=null && toMonitorList.Any())
             {
                 Dictionary<string, InstrumentDeribitBase> monitored = toMonitorList
                     .ToDictionary(a => a.InstrumentName,
@@ -105,7 +106,8 @@ namespace XbtoMarketData.Service.Monitor
             {
                 List<InstrumentDeribitBase> instruments = new List<InstrumentDeribitBase>();
 
-                //keeping mininmal lock time. clients could be adding instruments to be monitoring. 
+                // keeping mininmal lock time. clients could be adding instruments to be monitoring. 
+                // Thread Safe
                 lock (_lock)
                 {
                     instruments = _monitored.Select(a => a.Value).ToList();
@@ -123,15 +125,18 @@ namespace XbtoMarketData.Service.Monitor
                         break;
                     }
 
-                    //if rate limite, start to process
-                    var price = await _priceDataSource.GetLastPrice(item.InstrumentName);
-                    totalRequest++;
 
                     //Rate Limite. if has reach,it will wait til it can process agains
-                    await RateLimitConstrainer(rateLimit, (_dateProvider.Now - timeStarted).TotalSeconds, totalRequest);
+                    await WaiterRateLimitConstraint(rateLimit, (_dateProvider.Now - timeStarted).TotalSeconds, totalRequest);
 
+            
+                    //get the last price
+                    var price = await _priceDataSource.GetLastPrice(item.InstrumentName);
+
+                    //TODO : log it for observability
                     if (price == null)
                     {
+                      
                         continue;
                     }
 
@@ -144,30 +149,44 @@ namespace XbtoMarketData.Service.Monitor
 
                     };
 
-                    //REFAC(?)
+                    //Save to Repository
                     //It should be listeing to the event and saving async? Save price is a command
                     await _priceRepo.AddUpdate(priceDb);
 
 
-                    //notify the subscribers 
+                    //Notify the subscribers 
                     PriceChanged?.Invoke(price);
 
+                    totalRequest++;
+
                 }
 
-                var runningTime = (_dateProvider.Now - timeStarted).TotalSeconds;
-
-                if (runningTime < _fetchIntervalSeconds)
-                {
-                    // Wait before fetching prices again    
-                    //it just need to wait for the remaiing interval from the last pulse 
-                    var waitTimeForNextFecth = (int)Math.Ceiling(_fetchIntervalSeconds - runningTime);
-                    await Task.Delay(waitTimeForNextFecth * 1000);
-                }
+                // if all have processed before the time for the next trigger, it waits for the time interval
+                // otherwise starts right away
+                await WaitForNextTrigger(timeStarted);
 
             }
 
 
         }
+        /// <summary>
+        /// Calculate the remmaining time need to await for next trigger
+        /// </summary>
+        /// <param name="timeStarted"></param>
+        /// <returns></returns>
+        protected async Task WaitForNextTrigger(DateTime timeStarted)
+        {
+            var runningTime = (_dateProvider.Now - timeStarted).TotalSeconds;
+
+            if (runningTime < _fetchIntervalSeconds)
+            {
+                // Wait before fetching prices again    
+                //it just need to wait for the remaiing interval from the last pulse 
+                var waitTimeForNextFecth = (int)Math.Ceiling(_fetchIntervalSeconds - runningTime);
+                await Task.Delay(waitTimeForNextFecth * 1000);
+            }
+        }
+
         /// <summary>
         /// This Function Maximise the using of the rate Limite
         /// it calculates the time it need to await so fix a max limite rate
@@ -176,7 +195,7 @@ namespace XbtoMarketData.Service.Monitor
         /// <param name="runningTime"> Total time running </param>
         /// <param name="totalRequest">Total Request  </param>
         /// <returns></returns>
-        protected virtual async Task RateLimitConstrainer(int rateLimit, double runningTime, int totalRequest)
+        protected virtual async Task WaiterRateLimitConstraint(int rateLimit, double runningTime, int totalRequest)
         {
             if (runningTime <= 0)
             {
