@@ -119,7 +119,7 @@ namespace XbtoMarketData.Service.Monitor
                 foreach (var item in instruments)
                 {
 
-                    if (cancellationToken.IsCancellationRequested == false && _cancellationToken.Token.IsCancellationRequested)
+                    if (cancellationToken.IsCancellationRequested  || _cancellationToken.Token.IsCancellationRequested )
                     {
                         Console.WriteLine("Cancellation requested. Stopping price fetching.");
                         break;
