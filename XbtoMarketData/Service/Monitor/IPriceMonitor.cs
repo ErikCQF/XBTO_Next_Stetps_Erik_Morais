@@ -1,6 +1,6 @@
 ﻿using XbtoMarketData.DataSource.Price;
 
-namespace XbtoMarketData.Service
+namespace XbtoMarketData.Service.Monitor
 {
     public interface IPriceMonitor
     {

@@ -42,6 +42,17 @@ namespace XbtoMarketData.DataRepository.Instrument
             return instrument;
         }
 
+        public async Task<InstrumentDb?> GetByName(string instrumentName)
+        {
+            // Read existing data from file
+            List<InstrumentDb>? existingData = await ReadFromFile();
+
+            return await Task.FromResult(existingData?
+                .Where(a => string.Equals(a?.InstrumentName, instrumentName, StringComparison.OrdinalIgnoreCase))
+                .FirstOrDefault());
+
+        }
+
         public async Task<List<InstrumentDb>?> GetToMonitor()
         {
             // Read existing data from file

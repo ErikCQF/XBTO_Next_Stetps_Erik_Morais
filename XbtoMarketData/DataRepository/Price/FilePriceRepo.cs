@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Reflection.Metadata.Ecma335;
+using System.Text.Json;
 
 namespace XbtoMarketData.DataRepository.Price
 {
@@ -37,6 +38,18 @@ namespace XbtoMarketData.DataRepository.Price
             await WriteToFile(existingData);
 
             return instrument;
+        }
+
+        public async Task<PriceDb> LastPrice(string instrumentName)
+        {
+            var prices =  await ReadFromFile();
+
+            var existingData = prices?
+                .Where(a => string.Equals(a?.InstrumentName, a?.InstrumentName, StringComparison.OrdinalIgnoreCase))
+                .LastOrDefault();
+
+
+            return await Task.FromResult(existingData);
         }
 
         private async Task<PriceDb[]> ReadFromFile()

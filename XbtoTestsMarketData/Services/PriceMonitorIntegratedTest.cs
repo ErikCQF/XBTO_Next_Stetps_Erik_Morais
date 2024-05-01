@@ -6,7 +6,7 @@ using XbtoMarketData.DataRepository.Price;
 using XbtoMarketData.DataSource;
 using XbtoMarketData.DataSource.Instrument;
 using XbtoMarketData.DataSource.Price;
-using XbtoMarketData.Service;
+using XbtoMarketData.Service.Monitor;
 using XbtoMarketData.Utils;
 
 namespace MarketPriceMonitor.Integrated

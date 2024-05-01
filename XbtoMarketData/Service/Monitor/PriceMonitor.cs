@@ -4,7 +4,7 @@ using XbtoMarketData.DataSource.Instrument;
 using XbtoMarketData.DataSource.Price;
 using XbtoMarketData.Utils;
 
-namespace XbtoMarketData.Service
+namespace XbtoMarketData.Service.Monitor
 {
     public class PriceMonitor : IPriceMonitor
     {
@@ -26,11 +26,11 @@ namespace XbtoMarketData.Service
                              IDateProvider dateProvider
                              )
         {
-            this._instrumentRepo = instrumentRepo;
-            this._priceRepo = priceRepo;
-            this._instrumentDataSource = instrumentDataSource;
-            this._priceDataSource = PriceDataSource;
-            this._dateProvider = dateProvider;
+            _instrumentRepo = instrumentRepo;
+            _priceRepo = priceRepo;
+            _instrumentDataSource = instrumentDataSource;
+            _priceDataSource = PriceDataSource;
+            _dateProvider = dateProvider;
         }
 
         public event Action<PriceDeribit>? PriceChanged;
@@ -44,18 +44,18 @@ namespace XbtoMarketData.Service
             }
 
             //get instrument from data source, save it to data store then start to monitor
-            var newInstrument = await this._instrumentDataSource.Get(instrumentName);
+            var newInstrument = await _instrumentDataSource.Get(instrumentName);
 
             ///Mappers
             if (newInstrument != null)
             {
                 var db = new InstrumentDb
                 {
-                     BaseCurrency = newInstrument.BaseCurrency ?? string.Empty,
-                     InstrumentName = newInstrument.InstrumentName ?? string.Empty,
-                     Kind = newInstrument.Kind ?? string.Empty,
+                    BaseCurrency = newInstrument.BaseCurrency ?? string.Empty,
+                    InstrumentName = newInstrument.InstrumentName ?? string.Empty,
+                    Kind = newInstrument.Kind ?? string.Empty,
                 };
-                await _instrumentRepo.AddUpdate(db);                
+                await _instrumentRepo.AddUpdate(db);
 
                 lock (_lock)
                 {
@@ -64,7 +64,7 @@ namespace XbtoMarketData.Service
             }
 
             // keeping mininmal lock time
-         
+
 
         }
 
@@ -76,10 +76,10 @@ namespace XbtoMarketData.Service
                 throw new ArgumentOutOfRangeException("Invalid values for fetchIntervalSeconds or rateLimit. Make sure they are positve numbers ");
             }
 
-            this._fetchIntervalSeconds = fetchIntervalSeconds;
-            this._rateLimitPerSecond = rateLimit;
-            this._cancellationToken = new CancellationTokenSource();
-            var toMonitorList = await this._instrumentRepo.GetToMonitor();
+            _fetchIntervalSeconds = fetchIntervalSeconds;
+            _rateLimitPerSecond = rateLimit;
+            _cancellationToken = new CancellationTokenSource();
+            var toMonitorList = await _instrumentRepo.GetToMonitor();
 
             //Loads all Saved Inttruments from DB to be Monitored
             if (toMonitorList.Any())
@@ -124,7 +124,7 @@ namespace XbtoMarketData.Service
                     }
 
                     //if rate limite, start to process
-                    var price = await this._priceDataSource.GetLastPrice(item.InstrumentName);
+                    var price = await _priceDataSource.GetLastPrice(item.InstrumentName);
                     totalRequest++;
 
                     //Rate Limite. if has reach,it will wait til it can process agains
@@ -146,7 +146,7 @@ namespace XbtoMarketData.Service
 
                     //REFAC(?)
                     //It should be listeing to the event and saving async? Save price is a command
-                    await this._priceRepo.AddUpdate(priceDb);
+                    await _priceRepo.AddUpdate(priceDb);
 
 
                     //notify the subscribers 
@@ -183,7 +183,7 @@ namespace XbtoMarketData.Service
                 return;
             }
             var usedRate = totalRequest / runningTime;
-            
+
             while (usedRate >= rateLimit)
             {
                 // it is running faster than the allowed rate, so we nneed to slow down
@@ -205,7 +205,7 @@ namespace XbtoMarketData.Service
                 */
 
                 //wait time in seconds
-                var waitTime = (ratesDiff / rateLimit) * 1000;
+                var waitTime = ratesDiff / rateLimit * 1000;
 
                 await Task.Delay(Convert.ToInt32(waitTime));
 
@@ -219,9 +219,9 @@ namespace XbtoMarketData.Service
 
         public void Stop()
         {
-            this._fetchIntervalSeconds = 0;
-            this._rateLimitPerSecond = 0;
-            this._cancellationToken.Cancel();
+            _fetchIntervalSeconds = 0;
+            _rateLimitPerSecond = 0;
+            _cancellationToken.Cancel();
 
             lock (_lock)
             {
