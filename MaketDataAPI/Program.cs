@@ -16,6 +16,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+/*******************************************************************************************/
+/************ APP SETTINGS SET UP (BEGIN) **************************************************/
+/*******************************************************************************************/
 
 
 //** DATA SOURCE Deribit
@@ -52,7 +55,9 @@ builder.Services.AddSingleton<IPriceMonitor, PriceMonitor>();
 
 builder.Services.AddSingleton<IPriceService, PriceService>();
 
-
+/*******************************************************************************************/
+/************ APP SETTINGS SET UP (END) **************************************************/
+/*******************************************************************************************/
 
 
 var app = builder.Build();
@@ -69,6 +74,11 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+/*******************************************************************************************/
+/***********************   START THE MONITOR TO COLLECT PRICE (Begin)   ********************/
+/*******************************************************************************************/
+
 
 // Run the PriceMonitor background task
 var priceMonitor = app.Services.GetRequiredService<IPriceMonitor>();
@@ -95,6 +105,9 @@ if (app.Environment.IsDevelopment())
 }
 
 
+/*******************************************************************************************/
+/***********************   START THE MONITOR TO COLLECT PRICE (End)   ********************/
+/*******************************************************************************************/
 
 
 
