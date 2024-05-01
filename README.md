@@ -45,6 +45,29 @@ See appSetting.json
 
 # Market Data Recorder for Deribit Instruments
 
+The Monitor price services has only these functionalites:
+
+-**Start**()
+
+-**Stop**()
+
+-**MonitorPrice**(string instrumentName)()
+
+-**Event** : PriceChanged<Price>
+
+
+```
+interface IPriceMonitor {
+   + Task Start(int fetchIntervalSeconds, int rateLimit, CancellationToken cancellationTokens);
+   + void Stop();
+   + void MonitorPrice(string instrumentName);
+   + event Action<PriceDeribit> PriceChanged;
+}
+
+```
+
+
+
 ## Guidelines:
 
 This exercise is intended to be straight forward, but you may encounter some questions or issues - please work through these using your best judgement and document any assumptions/decisions you take. If time restrictions impact the design, please indicate what would have been done differently with more time.
