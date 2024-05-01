@@ -1,4 +1,4 @@
-# Xbto Next Steps ErikMorais
+# Xbto Next Steps Erik Morais
 
 
 
@@ -7,8 +7,7 @@
 To run the application locally, please make the **MaketDataAPI** as you start up project
 You can use **Swagger** to add instruments to be monitored and get last prices using end points
 
-There is a Get Last Price End Point and a Monitor Price End Point, Instrument name are the parameters you need to test.
-As you are running locally, you can see the prices being written to Console Monitor.
+There is a Get Last Price endpoint and a Monitor Price endpoint. Instrument name is the parameter you need to test. As you are running locally, you can see the prices being written to the Console Monitor.
 
 ## Deribit/ Monitor Price/ Repositories Set Up
 
