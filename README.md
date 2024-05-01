@@ -2,53 +2,63 @@
 
 # Market Data Recorder for Deribit Instruments
 
-## Overview
+## Guidelines:
 
-This project implements a market data recorder for Deribit instruments using C# and .NET 6. It fetches the latest price per instrument at regular intervals while respecting the rate limit provided by the Deribit API. The retrieved data is persisted into a data store of choice.
+This exercise is intended to be straight forward, but you may encounter some questions or issues - please work through these using your best judgement and document any assumptions/decisions you take. If time restrictions impact the design, please indicate what would have been done differently with more time.
 
-## Implementation Details
+Time spent on this exercise can be limited to 4 hours.
 
-1. **Data Fetching**: The latest price per instrument is fetched from Deribit using either Websockets or REST, depending on the chosen approach.
+## Coding Exercise:
 
-2. **Rate Limiting**: The application respects the rate limit specified by the Deribit API to avoid exceeding the allowed request frequency.
+Using C# and .Net6 or above, implement a market data recorder for Deribit instruments and expose that market data for client consumption.
 
-3. **Data Persistence**: The retrieved market data is persisted into a data store, such as a text file or database, to ensure it is available for later retrieval.
+1. Using either Websockets or Rest (your choice), fetch the latest price per instrument every N seconds while respecting the rate limit. Persist the retrieved data into the data store of your choice (text file, database, etc).
 
-4. **Service Endpoint (Optional)**: Time permitting, a service endpoint is provided to allow clients to retrieve the persisted pricing data.
+2. Time permitting, create a service for clients to retrieve the pricing data you've persisted above.
 
-## Deribit API References
+## Deribit API References:
 
 - [Deribit API v2.1.1 Documentation](https://docs.deribit.com/#deribit-api-v2-1-1)
 - [Public: Get Instruments](https://docs.deribit.com/#public-get_instruments)
 - [Public: Get Last Trades by Instrument](https://docs.deribit.com/#public-get_last_trades_by_instrument)
 
-## Time Restrictions
-
-Due to time restrictions, the following considerations were made:
-
-- **Choice of Data Store**: For simplicity, a text file or simple database (e.g., SQLite) may be chosen for data persistence. More robust solutions like a relational database or cloud storage could be considered with more time.
-- **Service Endpoint Implementation**: The service endpoint for clients to retrieve pricing data may be implemented using ASP.NET Core Web API with appropriate controller endpoints.
-
-## Assumptions and Decisions
-
-- **Data Persistence**: Since the exercise does not specify a preferred data store, a simple text file or lightweight database solution will be used for persistence.
-- **Rate Limit Handling**: The application will handle rate limiting by respecting the rate limit specified by the Deribit API and implementing appropriate throttling mechanisms to avoid exceeding the allowed request frequency.
-
-## Future Improvements
-
-With more time, the following improvements could be made:
-
-- **Enhanced Data Store**: Implementing a more robust data store solution, such as a relational database or cloud storage, for better scalability and performance.
-- **Service Endpoint Enhancements**: Adding authentication, pagination, filtering, and sorting capabilities to the service endpoint for improved client interaction.
-- **Error Handling and Logging**: Implementing comprehensive error handling and logging mechanisms to capture and report errors effectively.
-
-## Time Spent
-
-The exercise was completed within the allotted 4 hours timeframe. However, additional time may be required for further enhancements and optimizations.
-
 
 ## Dev Set Up 
 To run the application locally, please make the **MaketDataAPI** as you start up project
+You can use Swagger to add instruments to be monitored and get last prices using end points
+
+## Deribit/ Monitor Price/ Repositories Set Up
+
+See appSetting.json
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+
+  // Deribit settings for connection. It is using test
+  "DeribitOSettings": {
+    "ApiKey": "your_api_key",
+    "ApiSecret": "your_api_secret",
+    "WsUrl": "wss://test.deribit.com/ws/api/v2"
+  },
+
+  "MonitorPriceSettings": {
+    // Trigger each seconds
+    "fetchIntervalSeconds": 3,
+    // Max request per seconds
+    "RateLimit": 10
+  },
+
+  // This version saves the data states into JSON files.
+  "ConnectionStrings": {
+    "InstrumentDB": "InstrumentData.json",
+    "PriceDB": "PriceData.json"
+  }
+}
 
 
 ## Documentation
